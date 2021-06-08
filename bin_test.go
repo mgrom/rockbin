@@ -10,12 +10,13 @@ func TestBinUpdate(t *testing.T) {
 	assert := assert.New(t)
 
 	b := Bin{
-		FilePath: `tests/RoboController.cfg`,
-		Capacity: 3600.,
+		FilePath:        `tests/RoboController.cfg`,
+		ChargerFilePath: `tests/ChargerPos.data`,
+		Capacity:        3600.,
 	}
 
 	b.Update()
-	assert.Equal(b.Seconds, 100.)
+	assert.Equal(100., b.Seconds)
 }
 
 func TestConvert(t *testing.T) {
@@ -33,9 +34,10 @@ func TestConvert(t *testing.T) {
 
 	for _, test := range tests {
 		b := Bin{
-			FilePath: `tests/RoboController.cfg`,
-			Capacity: test.capacity,
-			Unit:     test.unit,
+			FilePath:        `tests/RoboController.cfg`,
+			ChargerFilePath: `tests/ChargerPos.data`,
+			Capacity:        test.capacity,
+			Unit:            test.unit,
 		}
 
 		b.Update()

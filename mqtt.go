@@ -12,12 +12,23 @@ import (
 )
 
 type mqttConfig struct {
-	Name              string      `json:"name"`
-	UnitOfMeasurement string      `json:"unit_of_measurement"`
-	StateTopic        string      `json:"state_topic"`
-	ConfigTopic       string      `json:"-"`
-	UniqueID          string      `json:"unique_id"`
-	Client            mqtt.Client `json:"-"`
+	Name              string `json:"name"`
+	UnitOfMeasurement string `json:"unit_of_measurement"`
+	StateTopic        string `json:"state_topic"`
+	StateTemplate     string `json:"value_template"`
+	AttributesTopic   string `json:"json_attributes_topic"`
+	// AttributesTemplate string      `json:"json_attributes_template"`
+	ConfigTopic string      `json:"-"`
+	UniqueID    string      `json:"unique_id"`
+	Device      Device      `json:"device"`
+	Client      mqtt.Client `json:"-"`
+}
+
+type Device struct {
+	DeviceID     string `json:"identifiers"`
+	Model        string `json:"model"`
+	Manufacturer string `json:"manufacturer"`
+	Name         string `json:"name"`
 }
 
 func (m *mqttConfig) Connect(uri *url.URL, username string, password string) {

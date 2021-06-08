@@ -16,20 +16,31 @@ var defaultCapacity = 60 * 40.
 
 // Bin a type to represent the bin
 type Bin struct {
-	FilePath string
-	Capacity float64
-	Seconds  float64
-	Unit     string
-	Value    string
+	FilePath        string
+	ChargerFilePath string
+	Capacity        float64
+	Seconds         float64
+	Unit            string
+	Value           string
+	Position        Position
+}
+type Position struct {
+	PositionX float64
+	PositionY float64
 }
 
 // Update update the bin values
 func (b *Bin) Update() {
 	file, err := os.Open(b.FilePath)
+	filePosition, errPosition := os.Open(b.ChargerFilePath)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	defer file.Close()
+	if errPosition != nil {
+		log.Fatalln(errPosition)
+	}
+	defer filePosition.Close()
 
 	scanner := bufio.NewScanner(file)
 	line := ""
@@ -48,6 +59,29 @@ func (b *Bin) Update() {
 		log.Fatalln(err)
 	}
 	b.convert()
+	scannerPosittion := bufio.NewScanner(filePosition)
+	linePosition := ""
+	xResult := ""
+	yResult := ""
+	for scannerPosittion.Scan() {
+		linePosition = scannerPosittion.Text()
+		if strings.Contains(linePosition, "x") {
+			xResult = strings.Split(linePosition, "=")[1]
+			xResult = strings.Trim(xResult, " ;")
+		}
+		if strings.Contains(linePosition, "y") {
+			yResult = strings.Split(linePosition, "=")[1]
+			yResult = strings.Trim(yResult, " ;")
+		}
+	}
+	filePosition.Close()
+	b.Position.PositionX, err = strconv.ParseFloat(xResult, 32)
+	b.Position.PositionY, err = strconv.ParseFloat(yResult, 32)
+	log.WithFields(log.Fields{"xPosition": b.Position.PositionX}).Info("Parsed x position")
+	log.WithFields(log.Fields{"yPosition": b.Position.PositionY}).Info("Parsed y position")
+	if err != nil {
+		log.Fatalln(err)
+	}
 }
 
 // Convert convert the observed value to desired value
