@@ -27,11 +27,11 @@ func config() (Bin, mqttConfig) {
 	flag.StringVar(&mqttServer, "mqtt_server", "mqtt://localhost:1883", "mqtt broker address")
 	flag.StringVar(&mqttUser, "mqtt_user", lookUpEnv("MQTT_USER", ""), "mqtt user")
 	flag.StringVar(&mqttPassword, "mqtt_password", lookUpEnv("MQTT_PASSWORD", ""), "mqtt password")
-	flag.StringVar(&mqttStateTopic, "mqtt_state_topic", "homeassistant/sensor/%v", "State topic (%v is replaced with the sensor_name value)")
-	flag.StringVar(&mqttStateTemplate, "mqtt_state_template", "{{ value_json.Value }}", "template for bin")
+	flag.StringVar(&mqttStateTopic, "mqtt_state_topic", "rockbin/%v", "State topic (%v is replaced with the sensor_name value)")
+	flag.StringVar(&mqttStateTemplate, "mqtt_state_template", "{{ value_json.value }}", "template for bin")
 
-	flag.StringVar(&mqttAttributesTopic, "mqtt_attributes_topic", "homeassistant/sensor/%v", "Attributes topic (%v is replaced with the sensor_name value)")
-	flag.StringVar(&mqttAttributesTemplate, "mqtt_attributes_template", "{{ value_json.Position | to_json }}", "template for charger position")
+	flag.StringVar(&mqttAttributesTopic, "mqtt_attributes_topic", "rockbin/%v", "Attributes topic (%v is replaced with the sensor_name value)")
+	flag.StringVar(&mqttAttributesTemplate, "mqtt_attributes_template", "{{ value_json.position | to_json }}", "template for charger position")
 
 	flag.StringVar(&sensorName, "sensor_name", "vacuumbin", "Name of sensor in Home Assistant")
 	flag.StringVar(&mqttDeviceId, "device_id", "VacumParams", "ID of device in Home Assistant")

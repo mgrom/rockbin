@@ -16,17 +16,22 @@ var defaultCapacity = 60 * 40.
 
 // Bin a type to represent the bin
 type Bin struct {
-	FilePath        string
-	ChargerFilePath string
-	Capacity        float64
-	Seconds         float64
-	Unit            string
-	Value           string
-	Position        Position
+	FilePath        string   `json:"-"`
+	ChargerFilePath string   `json:"-"`
+	Capacity        float64  `json:"-"`
+	Seconds         float64  `json:"-"`
+	Unit            string   `json:"-"`
+	Value           string   `json:"value"`
+	Position        Position `json:"position"`
+}
+
+type BinState struct {
+	Value    string   `json:"value"`
+	Position Position `json:"position"`
 }
 type Position struct {
-	PositionX float64
-	PositionY float64
+	PositionX string `json:"position_x"`
+	PositionY string `json:"position_y"`
 }
 
 // Update update the bin values
@@ -75,8 +80,12 @@ func (b *Bin) Update() {
 		}
 	}
 	filePosition.Close()
-	b.Position.PositionX, err = strconv.ParseFloat(xResult, 32)
-	b.Position.PositionY, err = strconv.ParseFloat(yResult, 32)
+	tmpX := .0
+	tmpX, err = strconv.ParseFloat(xResult, 32)
+	b.Position.PositionX = fmt.Sprintf("%.0f", tmpX)
+	tmpY := .0
+	tmpY, err = strconv.ParseFloat(yResult, 32)
+	b.Position.PositionY = fmt.Sprintf("%.0f", tmpY)
 	log.WithFields(log.Fields{"xPosition": b.Position.PositionX}).Info("Parsed x position")
 	log.WithFields(log.Fields{"yPosition": b.Position.PositionY}).Info("Parsed y position")
 	if err != nil {
