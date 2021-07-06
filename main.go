@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -30,6 +31,7 @@ func main() {
 
 		mqttClient.SendConfig()
 		bin.Update()
+		bin.UpdatePosition()
 		binJson, errJosn := preparePayload(bin)
 		if errJosn != nil {
 			log.Debug("error")
@@ -41,15 +43,11 @@ func main() {
 	// Setup a file watcher to get instance updates on file changes
 	log.Debug("Setting up file watcher")
 	watcher, err := fsnotify.NewWatcher()
-	watcherPosition, errPosition := fsnotify.NewWatcher()
 	if err != nil {
 		log.Println(err)
 	}
-	if errPosition != nil {
-		log.Println(errPosition)
-	}
 	defer watcher.Close()
-	defer watcherPosition.Close()
+	// defer watcherPosition.Close()
 
 	done := make(chan bool)
 
@@ -60,7 +58,12 @@ func main() {
 				_ = event
 				time.Sleep(time.Second * 1)
 
-				bin.Update()
+				if strings.Contains(event.Name, "ChargerPos") {
+					bin.UpdatePosition()
+				} else {
+					bin.Update()
+				}
+
 				binJson, errJosn := preparePayload(bin)
 				if errJosn != nil {
 					log.Debug("error")
@@ -68,22 +71,6 @@ func main() {
 				mqttClient.Send(binJson)
 			case err := <-watcher.Errors:
 				log.Fatalln(err)
-
-			}
-
-			select {
-			case event := <-watcherPosition.Events:
-				_ = event
-				time.Sleep(time.Second * 1)
-
-				bin.Update()
-				binJson, errJosn := preparePayload(bin)
-				if errJosn != nil {
-					log.Debug("error")
-				}
-				mqttClient.Send(binJson)
-			case errPosition := <-watcherPosition.Errors:
-				log.Fatalln(errPosition)
 			}
 		}
 	}()
@@ -92,8 +79,8 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	if errPosition := watcherPosition.Add(bin.ChargerFilePath); errPosition != nil {
-		log.Fatalln(errPosition)
+	if err := watcher.Add(bin.ChargerFilePath); err != nil {
+		log.Fatalln(err)
 	}
 
 	<-done
